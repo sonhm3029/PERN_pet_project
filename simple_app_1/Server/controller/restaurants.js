@@ -4,7 +4,17 @@ class RestaurantController {
 
     async getRestaurants(req, res, next) {
         try {
-            const response = await db.query(`SELECT * FROM restaurants`);
+            const response =
+                await db.query(
+                    `SELECT * FROM restaurants AS RES `+
+                    `LEFT JOIN `+
+                    `(SELECT `+
+                        `TRUNC(AVG(rating),1) AS rating, `+
+                        `COUNT(restaurant_id) AS num_rating, `+
+                        `restaurant_id `+
+                    `FROM reviews GROUP BY restaurant_id) AS REV `+
+                    `ON RES.id = REV.restaurant_id`
+                );
             res.status(200).json({
                 status:"success",
                 data:response.rows,
